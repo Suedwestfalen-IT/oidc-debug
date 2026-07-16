@@ -1,0 +1,23 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Python (aus früheren Backend-Iterationen, harmlos falls nie genutzt)
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editoren
+.idea/
+.vscode/
+*.swp
+*.swo

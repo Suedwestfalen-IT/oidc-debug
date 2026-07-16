@@ -1,5 +1,5 @@
 <script>
-  import { settings, isConfigured, clearSettings } from '../lib/settings.ts';
+  import { settings, isConfigured, clearSettings, resolveIssuer } from '../lib/settings.ts';
   import { logout } from '../lib/oidc.ts';
 
   export let onSaved = () => {};
@@ -9,13 +9,35 @@
   let clientId = $settings.clientId;
   let extraScopes = $settings.extraScopes;
   let confirmClear = false;
+  let checking = false;
+  let error = '';
+  let fallbackNote = '';
 
   $: valid = issuer.trim().length > 0;
 
-  function save() {
-    if (!valid) return;
-    settings.set({ issuer: issuer.trim().replace(/\/$/, ''), clientId: clientId.trim() || 'dashboard', extraScopes: extraScopes.trim() });
-    onSaved();
+  async function save() {
+    if (!valid || checking) return;
+    checking = true;
+    error = '';
+    fallbackNote = '';
+    try {
+      const result = await resolveIssuer(issuer);
+      settings.set({
+        issuer: result.issuer,
+        clientId: clientId.trim() || 'dashboard',
+        extraScopes: extraScopes.trim(),
+      });
+      if (result.usedFallback) {
+        // Kurzer Hinweis, dann trotzdem weiter — kein Blocker.
+        fallbackNote = `Hinweis: "${issuer.trim()}" war nicht direkt als Issuer nutzbar, ` +
+          `${result.issuer} wurde nach Anhängen von /.well-known/openid-configuration erkannt.`;
+      }
+      onSaved();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      checking = false;
+    }
   }
 
   function handleClear() {
@@ -28,6 +50,8 @@
     clientId = 'dashboard';
     extraScopes = '';
     confirmClear = false;
+    error = '';
+    fallbackNote = '';
   }
 </script>
 
@@ -40,7 +64,7 @@
   <div class:card-body={embedded} class:p-4={!embedded}>
     <div class="mb-3">
       <label class="form-label small fw-semibold" for="issuer">
-        Issuer-URL <span class="text-danger">*</span>
+        Issuer- oder Discovery-URL <span class="text-danger">*</span>
       </label>
       <input
         id="issuer"
@@ -49,7 +73,8 @@
         bind:value={issuer}
       />
       <div class="form-text">
-        Muss <code>&lt;issuer&gt;/.well-known/openid-configuration</code> bereitstellen.
+        Reine Issuer-URL oder komplette Discovery-URL (mit
+        <code>/.well-known/openid-configuration</code>) – beides wird erkannt.
         Beispiele: Keycloak <code>https://sso.example.org/realms/myrealm</code>,
         Authentik <code>https://auth.example.org/application/o/myapp</code>,
         Auth0 <code>https://mytenant.eu.auth0.com/</code>.
@@ -68,9 +93,24 @@
       <div class="form-text">Zusätzlich zu <code>openid email profile</code>, space-getrennt.</div>
     </div>
 
+    {#if error}
+      <div class="alert alert-danger py-2 small mb-3">
+        <i class="bi bi-exclamation-triangle me-1"></i>{error}
+      </div>
+    {/if}
+    {#if fallbackNote}
+      <div class="alert alert-info py-2 small mb-3">
+        <i class="bi bi-info-circle me-1"></i>{fallbackNote}
+      </div>
+    {/if}
+
     <div class="d-flex gap-2">
-      <button class="btn btn-primary" disabled={!valid} on:click={save}>
-        <i class="bi bi-check-lg me-1"></i>Speichern
+      <button class="btn btn-primary" disabled={!valid || checking} on:click={save}>
+        {#if checking}
+          <span class="spinner-border spinner-border-sm me-1"></span>Prüfe Discovery-Dokument…
+        {:else}
+          <i class="bi bi-check-lg me-1"></i>Speichern
+        {/if}
       </button>
       {#if isConfigured($settings)}
         <button

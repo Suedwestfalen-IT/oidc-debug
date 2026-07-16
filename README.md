@@ -79,6 +79,24 @@ npm install
 npm run dev
 ```
 
+### Fertiges Image nutzen (kein lokaler Build nötig)
+
+Eine GitHub Action (`.github/workflows/build-image.yml`) baut das Image bei
+jedem Push auf `main` und bei Version-Tags (`v*`) automatisch und
+veröffentlicht es nach GitHub Container Registry. Nach dem ersten Lauf lässt
+sich das Image direkt ziehen:
+
+```bash
+docker pull ghcr.io/<owner>/<repo>:main
+```
+
+In `docker-compose.yml` dafür `build: ./frontend` durch `image:
+ghcr.io/<owner>/<repo>:main` ersetzen. `<owner>/<repo>` durch den tatsächlichen
+GitHub-Namespace ersetzen (Kleinschreibung). Das Package ist standardmäßig an
+das Repository gebunden; sofern öffentlich sichtbar, ist kein Login zum Pullen
+nötig – ansonsten vorher `docker login ghcr.io` mit einem Personal Access
+Token (Scope `read:packages`) ausführen.
+
 ## Provider-Voraussetzungen
 
 - **Public Client** mit Redirect-URI `<frontend-origin>/` und **Web Origins**
@@ -97,3 +115,8 @@ npm run dev
 - ACR/Step-up ist optional: nur relevant, wenn der Provider ACR-Werte
   unterstützt. Ohne ACR-Konzept bleibt der `acr`-Claim einfach leer, die
   Badges zeigen dann `–`
+
+## Hinweis
+
+Diese App wurde mit Unterstützung von [Claude](https://claude.com) (Anthropic)
+entwickelt.
