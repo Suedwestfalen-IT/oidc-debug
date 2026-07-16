@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/suedwestfalen-it/oidc-debug:main
+    build: ./frontend
     restart: unless-stopped
     ports:
       - "9055:80"
