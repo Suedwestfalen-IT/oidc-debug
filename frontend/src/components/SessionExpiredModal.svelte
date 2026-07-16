@@ -8,7 +8,7 @@
       <i class="bi bi-clock-history text-warning mb-3" style="font-size:2.5rem"></i>
       <h6 class="fw-bold mb-1">Session abgelaufen</h6>
       <p class="text-muted small mb-4">Deine Sitzung ist abgelaufen.<br>Melde dich erneut an, um fortzufahren.</p>
-      <button class="btn btn-primary w-100" on:click={() => loginWithAcr('bronze')}>
+      <button class="btn btn-primary w-100" onclick={() => loginWithAcr('bronze')}>
         <i class="bi bi-box-arrow-in-right me-2"></i>Erneut einloggen
       </button>
     </div>

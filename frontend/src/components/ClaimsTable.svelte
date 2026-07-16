@@ -1,5 +1,5 @@
 <script>
-  export let claims = null;
+  let { claims = null } = $props();
 
   const fmt = (v) => (typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v));
   const isTimestamp = (k) => ['exp', 'iat', 'auth_time', 'nbf'].includes(k);

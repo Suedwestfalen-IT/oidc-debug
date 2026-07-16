@@ -1,13 +1,13 @@
 <script>
   import { currentUser, logout } from '../lib/oidc.ts';
 
-  export let onOpenSettings = () => {};
+  let { onOpenSettings = () => {} } = $props();
 
-  let open = false;
+  let open = $state(false);
 
-  $: profile = $currentUser?.profile;
-  $: displayName = profile?.name ?? profile?.preferred_username ?? '';
-  $: acr = profile?.acr ?? '–';
+  let profile = $derived($currentUser?.profile);
+  let displayName = $derived(profile?.name ?? profile?.preferred_username ?? '');
+  let acr = $derived(profile?.acr ?? '–');
 
   const acrBadge = (a) =>
     ({ bronze: 'text-bg-secondary', silver: 'text-bg-light border', gold: 'text-bg-warning' }[a] ?? 'text-bg-danger');
@@ -26,7 +26,7 @@
     <button
       class="btn btn-sm btn-light border"
       title="Provider-Einstellungen"
-      on:click={onOpenSettings}
+      onclick={onOpenSettings}
     >
       <i class="bi bi-gear text-primary"></i>
     </button>
@@ -34,7 +34,7 @@
     <div class="position-relative">
       <button
         class="btn btn-sm btn-light border d-flex align-items-center gap-2"
-        on:click={() => (open = !open)}
+        onclick={() => (open = !open)}
       >
         <i class="bi bi-person-circle text-primary"></i>
         <span>{displayName}</span>
@@ -45,7 +45,7 @@
         <div
           class="position-fixed"
           style="inset:0;z-index:1000"
-          on:click={() => (open = false)}
+          onclick={() => (open = false)}
           role="presentation"
         ></div>
         <div class="dropdown-menu show shadow-sm" style="right:0;left:auto;min-width:200px;z-index:1001">
@@ -54,7 +54,7 @@
           <div class="dropdown-divider my-1"></div>
           <button
             class="dropdown-item d-flex align-items-center gap-2 text-danger"
-            on:click={logout}
+            onclick={logout}
           >
             <i class="bi bi-box-arrow-right"></i>Abmelden
           </button>

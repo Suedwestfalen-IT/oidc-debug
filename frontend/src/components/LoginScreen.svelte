@@ -2,14 +2,14 @@
   import { loginWithAcr } from '../lib/oidc.ts';
   import { settings } from '../lib/settings.ts';
 
-  export let onOpenSettings = () => {};
+  let { onOpenSettings = () => {} } = $props();
 </script>
 
 <div class="d-flex align-items-center justify-content-center min-vh-100 bg-light position-relative">
   <button
     class="btn btn-sm btn-light border position-absolute top-0 end-0 m-3"
     title="Provider-Einstellungen"
-    on:click={onOpenSettings}
+    onclick={onOpenSettings}
   >
     <i class="bi bi-gear text-primary"></i>
   </button>
@@ -24,16 +24,16 @@
       <i class="bi bi-hdd-network me-1"></i>{$settings.issuer}
     </p>
 
-    <button class="btn btn-primary w-100 py-2 mb-3" on:click={() => loginWithAcr('bronze')}>
+    <button class="btn btn-primary w-100 py-2 mb-3" onclick={() => loginWithAcr('bronze')}>
       <i class="bi bi-box-arrow-in-right me-2"></i>Anmelden <span class="badge text-bg-light ms-1">bronze</span>
     </button>
 
     <div class="text-muted mb-2" style="font-size:.75rem">Direkt mit höherem Level anmelden:</div>
     <div class="d-flex gap-2">
-      <button class="btn btn-outline-secondary btn-sm flex-fill" on:click={() => loginWithAcr('silver')}>
+      <button class="btn btn-outline-secondary btn-sm flex-fill" onclick={() => loginWithAcr('silver')}>
         <i class="bi bi-shield-shaded me-1"></i>silver
       </button>
-      <button class="btn btn-outline-warning btn-sm flex-fill" on:click={() => loginWithAcr('gold')}>
+      <button class="btn btn-outline-warning btn-sm flex-fill" onclick={() => loginWithAcr('gold')}>
         <i class="bi bi-shield-fill-check me-1"></i>gold
       </button>
     </div>

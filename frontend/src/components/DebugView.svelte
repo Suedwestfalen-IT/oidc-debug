@@ -4,11 +4,8 @@
   import ClaimsTable from './ClaimsTable.svelte';
   import StepUpPanel from './StepUpPanel.svelte';
 
-  let userinfo = null;
-  let verified = null;    // { claims, error } aus verifyAccessToken
-
-  // Nach jedem (Step-up-)Login neu laden – reagiert auf currentUser-Änderungen
-  $: if ($currentUser) refresh();
+  let userinfo = $state(null);
+  let verified = $state(null);    // { claims, error } aus verifyAccessToken
 
   async function refresh() {
     userinfo = null;
@@ -21,12 +18,17 @@
     verified = v;
   }
 
-  $: idClaims = $currentUser ? decodeJwt($currentUser.id_token ?? '') : null;
-  $: accessClaims = $currentUser ? decodeJwt($currentUser.access_token) : null;
-  $: verifiedAcr = verified?.claims?.acr ?? null;
-  $: verifiedAcrLevel = ACR_LEVELS[verifiedAcr ?? ''] ?? 0;
+  // Nach jedem (Step-up-)Login neu laden – reagiert auf currentUser-Änderungen
+  $effect(() => {
+    if ($currentUser) refresh();
+  });
 
-  let copied = '';
+  let idClaims = $derived($currentUser ? decodeJwt($currentUser.id_token ?? '') : null);
+  let accessClaims = $derived($currentUser ? decodeJwt($currentUser.access_token) : null);
+  let verifiedAcr = $derived(verified?.claims?.acr ?? null);
+  let verifiedAcrLevel = $derived(ACR_LEVELS[verifiedAcr ?? ''] ?? 0);
+
+  let copied = $state('');
   async function copy(label, text) {
     await navigator.clipboard.writeText(text);
     copied = label;
@@ -59,7 +61,7 @@
     <div class="card shadow-sm h-100">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <span class="fw-semibold"><i class="bi bi-cloud-download me-2 text-primary"></i>UserInfo-Endpoint (IdP)</span>
-        <button class="btn btn-sm btn-outline-secondary" on:click={refresh}>
+        <button class="btn btn-sm btn-outline-secondary" onclick={refresh} aria-label="Aktualisieren">
           <i class="bi bi-arrow-clockwise"></i>
         </button>
       </div>
@@ -102,7 +104,7 @@
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="small fw-semibold">{label}</span>
-                <button class="btn btn-sm btn-outline-secondary py-0" on:click={() => copy(label, token)}>
+                <button class="btn btn-sm btn-outline-secondary py-0" onclick={() => copy(label, token)}>
                   {#if copied === label}<i class="bi bi-check-lg text-success"></i>{:else}<i class="bi bi-clipboard"></i>{/if}
                 </button>
               </div>

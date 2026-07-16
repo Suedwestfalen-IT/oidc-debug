@@ -1,10 +1,10 @@
 <script>
   import { currentUser, loginWithAcr, acrLevel } from '../lib/oidc.ts';
 
-  let essential = false;
+  let essential = $state(false);
 
-  $: currentAcr = $currentUser?.profile?.acr;
-  $: currentLevel = acrLevel(currentAcr);
+  let currentAcr = $derived($currentUser?.profile?.acr);
+  let currentLevel = $derived(acrLevel(currentAcr));
 
   const levels = ['bronze', 'silver', 'gold'];
   const icons = { bronze: 'bi-shield', silver: 'bi-shield-shaded', gold: 'bi-shield-fill-check' };
@@ -35,7 +35,7 @@
       {#each levels as level}
         <button
           class="btn flex-fill {currentAcr === level ? 'btn-success' : acrLevel(level) < currentLevel ? 'btn-outline-secondary' : 'btn-outline-primary'}"
-          on:click={() => loginWithAcr(level, { essential })}
+          onclick={() => loginWithAcr(level, { essential })}
         >
           <i class="bi {icons[level]} me-1"></i>{level}
           {#if currentAcr === level}<i class="bi bi-check-lg ms-1"></i>{/if}

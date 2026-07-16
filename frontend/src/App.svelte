@@ -8,8 +8,8 @@
   import DebugView from './components/DebugView.svelte';
   import SessionExpiredModal from './components/SessionExpiredModal.svelte';
 
-  let view = 'loading';                       // loading | setup | login | app
-  let showSettings = false;                   // Zahnrad-Overlay, wenn bereits eingeloggt
+  let view = $state('loading');                       // loading | setup | login | app
+  let showSettings = $state(false);                   // Zahnrad-Overlay, wenn bereits eingeloggt
 
   onMount(async () => {
     // Ohne Provider-Konfiguration kann kein UserManager gebaut werden (kein
@@ -48,12 +48,14 @@
 
   // Falls die Config während der Nutzung geleert wird (Zahnrad -> Zurücksetzen),
   // zurück zum Setup-Screen statt eine Debug-Ansicht mit ungültiger Config zu zeigen.
-  $: if (view === 'app' || view === 'login') {
-    if (!isConfigured($settings)) {
-      showSettings = false;
-      view = 'setup';
+  $effect(() => {
+    if (view === 'app' || view === 'login') {
+      if (!isConfigured($settings)) {
+        showSettings = false;
+        view = 'setup';
+      }
     }
-  }
+  });
 </script>
 
 {#if view === 'loading'}
@@ -80,7 +82,7 @@
       <div class="w-100 mx-3" style="max-width:520px">
         <SettingsView embedded={true} onSaved={() => (showSettings = false)} />
         <div class="text-center mt-2">
-          <button class="btn btn-link btn-sm text-white" on:click={() => (showSettings = false)}>Schließen</button>
+          <button class="btn btn-link btn-sm text-white" onclick={() => (showSettings = false)}>Schließen</button>
         </div>
       </div>
     </div>
@@ -98,7 +100,7 @@
       <div class="w-100 mx-3" style="max-width:520px">
         <SettingsView embedded={true} onSaved={() => (showSettings = false)} />
         <div class="text-center mt-2">
-          <button class="btn btn-link btn-sm text-white" on:click={() => (showSettings = false)}>Schließen</button>
+          <button class="btn btn-link btn-sm text-white" onclick={() => (showSettings = false)}>Schließen</button>
         </div>
       </div>
     </div>

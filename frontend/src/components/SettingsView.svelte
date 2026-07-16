@@ -2,18 +2,17 @@
   import { settings, isConfigured, clearSettings, resolveIssuer } from '../lib/settings.ts';
   import { logout } from '../lib/oidc.ts';
 
-  export let onSaved = () => {};
-  export let embedded = false; // true = im Navbar-Dropdown/Modal, false = eigener Vollbild-Screen
+  let { onSaved = () => {}, embedded = false } = $props(); // embedded: true = im Navbar-Dropdown/Modal, false = eigener Vollbild-Screen
 
-  let issuer = $settings.issuer;
-  let clientId = $settings.clientId;
-  let extraScopes = $settings.extraScopes;
-  let confirmClear = false;
-  let checking = false;
-  let error = '';
-  let fallbackNote = '';
+  let issuer = $state($settings.issuer);
+  let clientId = $state($settings.clientId);
+  let extraScopes = $state($settings.extraScopes);
+  let confirmClear = $state(false);
+  let checking = $state(false);
+  let error = $state('');
+  let fallbackNote = $state('');
 
-  $: valid = issuer.trim().length > 0;
+  let valid = $derived(issuer.trim().length > 0);
 
   async function save() {
     if (!valid || checking) return;
@@ -105,7 +104,7 @@
     {/if}
 
     <div class="d-flex gap-2">
-      <button class="btn btn-primary" disabled={!valid || checking} on:click={save}>
+      <button class="btn btn-primary" disabled={!valid || checking} onclick={save}>
         {#if checking}
           <span class="spinner-border spinner-border-sm me-1"></span>Prüfe Discovery-Dokument…
         {:else}
@@ -115,8 +114,8 @@
       {#if isConfigured($settings)}
         <button
           class="btn {confirmClear ? 'btn-danger' : 'btn-outline-danger'}"
-          on:click={handleClear}
-          on:mouseleave={() => (confirmClear = false)}
+          onclick={handleClear}
+          onmouseleave={() => (confirmClear = false)}
         >
           <i class="bi bi-trash me-1"></i>{confirmClear ? 'Wirklich löschen?' : 'Zurücksetzen'}
         </button>
@@ -125,7 +124,7 @@
     {#if isConfigured($settings)}
       <div class="form-text mt-2">
         <i class="bi bi-info-circle me-1"></i>Ändern erfordert einen erneuten Login.
-        <button class="btn btn-link btn-sm p-0 align-baseline" on:click={logout}>Jetzt abmelden</button>
+        <button class="btn btn-link btn-sm p-0 align-baseline" onclick={logout}>Jetzt abmelden</button>
       </div>
     {/if}
   </div>
